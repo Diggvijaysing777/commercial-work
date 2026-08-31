@@ -29,7 +29,7 @@ function setTab(btn){
 
 // ── HERO SLIDER ─────────────────────────────────
 const slides=[
-  {badge:'Spiti Valley, Himachal Pradesh',title:'Discover the<br><em>Soul</em> of the<br>Himalayas',desc:'Handcrafted mountain journeys — hidden valleys, ancient monasteries, and sky-touching peaks only the locals know.'},
+  {badge:'Spiti Valley, Himachal Pradesh',title:'Discover the<br><em>Soul</em> of<br>India',desc:'From Himalayan valleys to golden temples and royal palaces — handcrafted journeys with the people who know them best.'},
   {badge:'Manali, Himachal Pradesh',title:'Where Rivers<br><em>Meet</em> the<br>Snow Peaks',desc:'From apple orchards to snow-clad summits, experience the magic of Kullu Valley\'s most dramatic landscapes.'},
   {badge:'Shimla, Himachal Pradesh',title:'Walk Through<br>Colonial<br><em>Heritage</em>',desc:'The Queen of Hill Stations awaits — Victorian architecture, toy trains, and misty mountain mornings.'}
 ];
