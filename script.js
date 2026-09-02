@@ -49,9 +49,79 @@ function nextSlide(){goSlide((curSlide+1)%slides.length)}
 slideTimer=setInterval(nextSlide,5500);
 document.querySelectorAll('.sdot').forEach((d,i)=>d.addEventListener('click',()=>{clearInterval(slideTimer);goSlide(i);slideTimer=setInterval(nextSlide,5500)}));
 
+// ── HERO SPATIAL PARALLAX (mouse depth) ─────────
+(function(){
+  const hero=document.getElementById('hero');
+  if(!hero)return;
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const coarse=window.matchMedia('(hover:none),(pointer:coarse)').matches;
+  if(reduce||coarse)return;
+  let tx=0,ty=0,cx=0,cy=0,raf=null,inside=false;
+  const onMove=e=>{
+    const r=hero.getBoundingClientRect();
+    // -1 … 1 around centre
+    tx=((e.clientX-r.left)/r.width-.5)*2;
+    ty=((e.clientY-r.top)/r.height-.5)*2;
+    if(!raf)raf=requestAnimationFrame(loop);
+  };
+  function loop(){
+    cx+=(tx-cx)*.08;cy+=(ty-cy)*.08;
+    hero.style.setProperty('--mx',cx.toFixed(3));
+    hero.style.setProperty('--my',cy.toFixed(3));
+    if(Math.abs(tx-cx)>.001||Math.abs(ty-cy)>.001||inside){raf=requestAnimationFrame(loop);}
+    else{raf=null;}
+  }
+  hero.addEventListener('mousemove',e=>{inside=true;onMove(e);},{passive:true});
+  hero.addEventListener('mouseleave',()=>{inside=false;tx=0;ty=0;if(!raf)raf=requestAnimationFrame(loop);});
+})();
+
+// ── HERO SCROLL DRIFT (cinematic exit into depth) ─
+(function(){
+  const wrap=document.querySelector('.hero-content-wrap');
+  const floats=document.getElementById('heroFloat');
+  const hero=document.getElementById('hero');
+  if(!wrap||!hero)return;
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduce)return;
+  let ticking=false;
+  const upd=()=>{
+    const y=window.scrollY;
+    const h=hero.offsetHeight||1;
+    if(y<=h){                                // only while hero is in view
+      const p=Math.min(y/h,1);
+      wrap.style.setProperty('--sy',(-y*0.18).toFixed(1)+'px');
+      wrap.style.setProperty('--hop',(1-p*1.15).toFixed(3));
+      if(floats){floats.style.setProperty('--fy',(-y*0.08).toFixed(1)+'px');
+        floats.style.setProperty('--fop',(1-p*1.3).toFixed(3));}
+    }
+    ticking=false;
+  };
+  window.addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(upd);}},{passive:true});
+})();
+
 // ── SCROLL REVEAL ───────────────────────────────
 const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')}),{threshold:.1});
 document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// ── DESTINATION CARDS : pointer tilt (spatial objects) ─
+(function(){
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const coarse=window.matchMedia('(hover:none),(pointer:coarse)').matches;
+  if(reduce||coarse)return;
+  const MAX=6; // degrees — subtle
+  document.querySelectorAll('.dest-card').forEach(card=>{
+    let raf=null,rx=0,ry=0;
+    const apply=()=>{card.style.transform=`translateY(-4px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;raf=null;};
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width-.5;
+      const py=(e.clientY-r.top)/r.height-.5;
+      ry=px*MAX*2; rx=-py*MAX*2;
+      if(!raf)raf=requestAnimationFrame(apply);
+    },{passive:true});
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+})();
 
 // ── PACKAGE FILTER ──────────────────────────────
 function filterPkg(type,btn){
